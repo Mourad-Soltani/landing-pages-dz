@@ -65,3 +65,18 @@ https://countapi.mileshilliard.com/api/v1/get/landing-pages-dz-visits
 ---
 
 © لاندِكس — صفحات هبوط تبيع. الجزائر • دبي • الرياض
+
+
+## Analytics (Microsoft Clarity)
+
+- Project ID: `yodopyrsk3`
+- Live site: https://highx5fconvertingx5farabicx5flandin.vercel.app/
+- Public dashboard: https://highx5fconvertingx5farabicx5flandin.vercel.app/analytics
+
+### Vercel setup (required)
+
+1. Project → **Settings → Environment Variables**
+2. Add `CLARITY_API_TOKEN` = your Clarity Data Export token
+3. Redeploy
+
+API is cached 10 minutes and limited to 2 calls per load to avoid Clarity daily rate limits.
