@@ -157,5 +157,216 @@ Error generating stack: `+u.message+`
   fromIpapi().catch(function(){ return fromCountryIs(); }).catch(function(){});
 })();
 </script>
+
+<!-- LANDIX-UX-ENHANCE -->
+<style id="landix-ux-enhance">
+  html { scroll-behavior: smooth; }
+  /* Scroll progress */
+  #lx-progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 2147483646;
+    background: transparent; pointer-events: none;
+  }
+  #lx-progress > span {
+    display: block; height: 100%; width: 0%;
+    background: linear-gradient(90deg, #7c3aed, #f97316, #22d3ee);
+    box-shadow: 0 0 20px rgba(124,58,237,0.65);
+    transition: width 0.05s linear;
+  }
+  /* 3D ambient stage behind content */
+  #lx-stage {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    perspective: 1200px; transform-style: preserve-3d;
+  }
+  #lx-stage .orb {
+    position: absolute; border-radius: 50%; filter: blur(60px);
+    opacity: 0.45; will-change: transform;
+    animation: lx-float 18s ease-in-out infinite;
+  }
+  #lx-stage .orb.a {
+    width: 420px; height: 420px; top: -8%; right: -6%;
+    background: radial-gradient(circle, rgba(124,58,237,0.7), transparent 70%);
+    animation-duration: 22s;
+  }
+  #lx-stage .orb.b {
+    width: 360px; height: 360px; bottom: 10%; left: -8%;
+    background: radial-gradient(circle, rgba(249,115,22,0.55), transparent 70%);
+    animation-duration: 26s; animation-delay: -6s;
+  }
+  #lx-stage .orb.c {
+    width: 280px; height: 280px; top: 42%; left: 40%;
+    background: radial-gradient(circle, rgba(34,211,238,0.35), transparent 70%);
+    animation-duration: 20s; animation-delay: -3s;
+  }
+  @keyframes lx-float {
+    0%,100% { transform: translate3d(0,0,0) scale(1); }
+    33% { transform: translate3d(30px,-40px,40px) scale(1.08); }
+    66% { transform: translate3d(-25px,25px,-20px) scale(0.95); }
+  }
+  /* Grid mesh */
+  #lx-stage .mesh {
+    position: absolute; inset: -20%;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 64px 64px;
+    transform: rotateX(60deg) translateY(-10%) scale(1.4);
+    transform-origin: center top;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+    animation: lx-mesh 30s linear infinite;
+    opacity: 0.5;
+  }
+  @keyframes lx-mesh {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 0 64px, 64px 0; }
+  }
+  /* Ensure root sits above stage */
+  #root { position: relative; z-index: 1; }
+  /* Scroll reveal */
+  .lx-reveal {
+    opacity: 0;
+    transform: translate3d(0, 40px, -40px) rotateX(6deg);
+    transform-origin: center top;
+    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
+    will-change: opacity, transform;
+  }
+  .lx-reveal.lx-in {
+    opacity: 1;
+    transform: translate3d(0,0,0) rotateX(0);
+  }
+  /* Card 3D hover (safe targets) */
+  .lx-tilt {
+    transform-style: preserve-3d;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+  }
+  /* Scroll cue - only when near top */
+  #lx-scroll-cue {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    z-index: 50; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: rgba(255,255,255,0.7); font-family: Tajawal, system-ui, sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+    pointer-events: none; opacity: 0; transition: opacity 0.4s ease;
+  }
+  #lx-scroll-cue.show { opacity: 1; }
+  #lx-scroll-cue .chev {
+    width: 28px; height: 28px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.2);
+    display: grid; place-items: center;
+    animation: lx-bounce 1.6s ease infinite;
+    background: rgba(0,0,0,0.35); backdrop-filter: blur(8px);
+  }
+  @keyframes lx-bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+  /* Soft section separators glow on scroll focus */
+  .lx-focus-glow {
+    box-shadow: 0 0 0 1px rgba(167,139,250,0.15), 0 30px 80px rgba(124,58,237,0.08);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lx-reveal { opacity: 1; transform: none; transition: none; }
+    #lx-stage .orb, #lx-stage .mesh, #lx-scroll-cue .chev { animation: none !important; }
+  }
+</style>
+<div id="lx-progress" aria-hidden="true"><span></span></div>
+<div id="lx-stage" aria-hidden="true">
+  <div class="mesh"></div>
+  <div class="orb a"></div>
+  <div class="orb b"></div>
+  <div class="orb c"></div>
+</div>
+<div id="lx-scroll-cue"><div class="chev">↓</div><span>اكتشف الباقات والنتائج</span></div>
+<script>
+(function () {
+  if (window.__LANDIX_UX__) return;
+  window.__LANDIX_UX__ = true;
+
+  var progress = document.querySelector("#lx-progress > span");
+  var cue = document.getElementById("lx-scroll-cue");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function onScroll() {
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - window.innerHeight;
+    var p = max > 0 ? (window.scrollY / max) * 100 : 0;
+    if (progress) progress.style.width = p.toFixed(2) + "%";
+    if (cue) {
+      if (window.scrollY < 80) cue.classList.add("show");
+      else cue.classList.remove("show");
+    }
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // Parallax orbs with pointer (desktop)
+  var stage = document.getElementById("lx-stage");
+  if (stage && !reduce && window.matchMedia("(pointer:fine)").matches) {
+    window.addEventListener("pointermove", function (e) {
+      var x = (e.clientX / window.innerWidth - 0.5) * 24;
+      var y = (e.clientY / window.innerHeight - 0.5) * 18;
+      stage.style.transform = "translate3d(" + (-x) + "px," + (-y) + "px,0)";
+    }, { passive: true });
+  }
+
+  function markReveals() {
+    var root = document.getElementById("root");
+    if (!root) return;
+    // Target major blocks under root
+    var candidates = root.querySelectorAll("section, main > div, #root > div > div");
+    var seen = new Set();
+    candidates.forEach(function (el) {
+      if (seen.has(el)) return;
+      // skip tiny / fixed / nav-like
+      var r = el.getBoundingClientRect();
+      if (r.height < 120) return;
+      if (el.closest("[style*='position: fixed'], .fixed")) return;
+      seen.add(el);
+      el.classList.add("lx-reveal");
+    });
+  }
+
+  function observe() {
+    if (reduce) {
+      document.querySelectorAll(".lx-reveal").forEach(function (el) { el.classList.add("lx-in"); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add("lx-in");
+          en.target.classList.add("lx-focus-glow");
+          setTimeout(function () { en.target.classList.remove("lx-focus-glow"); }, 900);
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    document.querySelectorAll(".lx-reveal").forEach(function (el) { io.observe(el); });
+  }
+
+  // Wait for React to paint
+  function boot() {
+    markReveals();
+    observe();
+    // Hero slight 3D intro
+    var h1 = document.querySelector("#root h1");
+    if (h1 && !reduce) {
+      h1.style.transform = "translateZ(0)";
+      h1.style.textShadow = "0 20px 60px rgba(124,58,237,0.25)";
+    }
+  }
+  if (document.readyState === "complete") setTimeout(boot, 120);
+  else window.addEventListener("load", function () { setTimeout(boot, 120); });
+
+  // Re-scan after late React hydration
+  setTimeout(boot, 600);
+  setTimeout(boot, 1500);
+
+  // Gentle auto-hint: after 4s if still at top, pulse cue
+  setTimeout(function () {
+    if (window.scrollY < 40 && cue) cue.classList.add("show");
+  }, 4000);
+})();
+</script>
+<!-- /LANDIX-UX-ENHANCE -->
 </body>
 </html>
