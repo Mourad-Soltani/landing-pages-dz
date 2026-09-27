@@ -346,7 +346,7 @@
     function animateNumber(el, to) {
       if (to == null || isNaN(to)) { el.textContent = "—"; return; }
       var start = 0;
-      var from = parseInt(String(el.textContent).replace(/[^\d]/g), "") || "0", 10) || 0;
+      var from = parseInt(String(el.textContent).replace(/[^0-9]/g, "") || "0", 10) || 0;
       var diff = to - from;
       if (diff === 0) { el.textContent = fmt(to); return; }
       var t0 = performance.now();
