@@ -2,82 +2,327 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>لوحة التحليلات | لاندِكس</title>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#08080E" />
+  <title>لوحة تحكم لاندِكس | تحليلات مباشرة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg:#08080E; --card:#12121a; --border:rgba(255,255,255,.08);
-      --text:#f4f7fb; --muted:#8b9bb0; --purple:#a855f7; --purple-dim:rgba(168,85,247,.15);
-      --orange:#f97316; --blue:#38bdf8; --green:#22c55e;
+      --bg: #07070c;
+      --bg2: #0c0c14;
+      --card: rgba(255,255,255,0.03);
+      --card-solid: #101018;
+      --stroke: rgba(255,255,255,0.08);
+      --stroke2: rgba(255,255,255,0.14);
+      --text: #f7f7fb;
+      --muted: #8b8fa3;
+      --purple: #a78bfa;
+      --purple2: #7c3aed;
+      --orange: #fb923c;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --pink: #f472b6;
+      --radius: 20px;
+      --shadow: 0 24px 80px rgba(0,0,0,0.45);
+      --font: "IBM Plex Sans Arabic", system-ui, sans-serif;
+      --mono: "Space Grotesk", ui-monospace, monospace;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Tajawal,system-ui,sans-serif;background:radial-gradient(1000px 500px at 90% -10%,rgba(168,85,247,.18),transparent),radial-gradient(800px 400px at 0% 100%,rgba(249,115,22,.1),transparent),var(--bg);color:var(--text);min-height:100vh;padding:24px 16px 48px}
-    .wrap{max-width:1100px;margin:0 auto}
-    header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}
-    h1{font-size:1.5rem;font-weight:900}
-    .sub{color:var(--muted);font-size:.9rem;margin-top:4px}
-    .badge{display:inline-flex;align-items:center;gap:8px;background:var(--purple-dim);color:#d8b4fe;border:1px solid rgba(168,85,247,.4);padding:8px 14px;border-radius:999px;font-weight:800;font-size:.85rem}
-    .dot{width:8px;height:8px;border-radius:50%;background:var(--purple);box-shadow:0 0 10px var(--purple);animation:pulse 1.4s infinite}
-    @keyframes pulse{50%{opacity:.35}}
-    .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:20px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px}
-    .card .label{color:var(--muted);font-size:.8rem;font-weight:700;margin-bottom:8px}
-    .card .value{font-size:1.85rem;font-weight:900}
-    .card .hint{color:var(--muted);font-size:.75rem;margin-top:6px}
-    .panels{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
-    .panel h2{font-size:1rem;font-weight:800;margin-bottom:14px}
-    table{width:100%;border-collapse:collapse;font-size:.9rem}
-    th,td{text-align:right;padding:10px 6px;border-bottom:1px solid var(--border)}
-    th{color:var(--muted);font-weight:700;font-size:.75rem}
-    td.num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--blue)}
-    .bar-wrap{background:rgba(255,255,255,.06);border-radius:6px;height:6px;overflow:hidden;margin-top:4px}
-    .bar{height:100%;background:linear-gradient(90deg,var(--purple),var(--orange));border-radius:6px}
-    .empty{color:var(--muted);font-size:.9rem;padding:20px 0;text-align:center;line-height:1.7}
-    .footer{margin-top:28px;text-align:center;color:var(--muted);font-size:.8rem}
-    .footer a{color:#d8b4fe;text-decoration:none;font-weight:700}
-    .status{font-size:.8rem;color:var(--muted);margin-top:12px}
-    .status.err{color:#f87171}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-    .tabs button{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:999px;font-family:inherit;font-weight:700;cursor:pointer;font-size:.85rem}
-    .tabs button.active{background:var(--purple-dim);color:#d8b4fe;border-color:rgba(168,85,247,.45)}
-    .notice{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#fca5a5;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:.9rem;display:none}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(900px 500px at 100% -10%, rgba(124,58,237,0.22), transparent 55%),
+        radial-gradient(700px 400px at -10% 80%, rgba(251,146,60,0.12), transparent 50%),
+        radial-gradient(600px 300px at 50% 100%, rgba(34,211,238,0.06), transparent 40%),
+        var(--bg);
+      padding: 20px 16px 56px;
+    }
+    .noise {
+      pointer-events: none; position: fixed; inset: 0; z-index: 0; opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; }
+
+    /* Header */
+    .top {
+      display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+      gap: 16px; margin-bottom: 28px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .logo {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: linear-gradient(135deg, #7c3aed, #f97316);
+      display: grid; place-items: center;
+      font-family: var(--mono); font-weight: 700; font-size: 18px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 12px 40px rgba(124,58,237,0.35);
+    }
+    h1 {
+      font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+      font-weight: 700; letter-spacing: -0.02em;
+    }
+    .sub { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+    .live {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; border-radius: 999px;
+      background: rgba(52,211,153,0.1);
+      border: 1px solid rgba(52,211,153,0.28);
+      color: var(--green); font-weight: 600; font-size: 0.85rem;
+      backdrop-filter: blur(12px);
+    }
+    .live .pulse {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+      box-shadow: 0 0 0 0 rgba(52,211,153,0.6);
+      animation: ping 1.6s ease infinite;
+    }
+    @keyframes ping {
+      0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.55); }
+      70% { box-shadow: 0 0 0 10px rgba(52,211,153,0); }
+      100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+      padding: 6px; border-radius: 16px; width: fit-content;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--stroke);
+    }
+    .tabs button {
+      border: 0; background: transparent; color: var(--muted);
+      font-family: inherit; font-weight: 600; font-size: 0.85rem;
+      padding: 10px 16px; border-radius: 12px; cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .tabs button:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .tabs button.active {
+      color: #fff;
+      background: linear-gradient(135deg, rgba(124,58,237,0.9), rgba(168,85,247,0.75));
+      box-shadow: 0 8px 24px rgba(124,58,237,0.35);
+    }
+
+    /* KPI bento */
+    .kpis {
+      display: grid; gap: 14px;
+      grid-template-columns: repeat(12, 1fr);
+      margin-bottom: 14px;
+    }
+    .kpi {
+      grid-column: span 12;
+      position: relative; overflow: hidden;
+      border-radius: var(--radius);
+      padding: 22px 22px 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+    .kpi:hover { transform: translateY(-2px); border-color: var(--stroke2); }
+    @media (min-width: 640px) {
+      .kpi { grid-column: span 6; }
+    }
+    @media (min-width: 960px) {
+      .kpi { grid-column: span 3; }
+    }
+    .kpi::before {
+      content: ""; position: absolute; inset: auto -20% -40% auto; width: 160px; height: 160px;
+      border-radius: 50%; filter: blur(40px); opacity: 0.35; pointer-events: none;
+    }
+    .kpi.v::before { background: var(--purple2); }
+    .kpi.s::before { background: var(--cyan); }
+    .kpi.u::before { background: var(--orange); }
+    .kpi.d::before { background: var(--pink); }
+    .kpi .label {
+      display: flex; align-items: center; justify-content: space-between;
+      color: var(--muted); font-size: 0.8rem; font-weight: 600; margin-bottom: 12px;
+    }
+    .kpi .icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 15px;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--stroke);
+    }
+    .kpi .value {
+      font-family: var(--mono);
+      font-size: clamp(1.8rem, 4vw, 2.35rem);
+      font-weight: 700; letter-spacing: -0.03em;
+      background: linear-gradient(90deg, #fff, #c4b5fd);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .kpi .hint { color: var(--muted); font-size: 0.75rem; margin-top: 8px; }
+
+    /* Panels */
+    .panels {
+      display: grid; gap: 14px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 900px) {
+      .panels { grid-template-columns: 1.2fr 1fr; }
+      .panel.countries { grid-row: span 3; }
+    }
+    .panel {
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
+      border: 1px solid var(--stroke);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      min-height: 220px;
+    }
+    .panel h2 {
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .panel h2 span.tag {
+      font-size: 0.7rem; font-weight: 600; color: var(--purple);
+      background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.25);
+      padding: 3px 8px; border-radius: 999px;
+    }
+
+    .row {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 12px;
+      align-items: center; padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .row:last-child { border-bottom: 0; }
+    .flag {
+      width: 28px; height: 20px; border-radius: 4px; object-fit: cover;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+    }
+    .flag-fallback {
+      width: 28px; height: 20px; border-radius: 4px;
+      background: rgba(255,255,255,0.08); display: grid; place-items: center;
+      font-size: 11px; color: var(--muted);
+    }
+    .name { font-weight: 600; font-size: 0.92rem; }
+    .bar-track {
+      height: 6px; border-radius: 99px; background: rgba(255,255,255,0.06);
+      overflow: hidden; margin-top: 6px;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #7c3aed, #fb923c);
+      transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .num {
+      font-family: var(--mono); font-weight: 600; font-size: 0.95rem;
+      color: var(--cyan); font-variant-numeric: tabular-nums;
+    }
+
+    .empty {
+      color: var(--muted); text-align: center; padding: 36px 12px;
+      font-size: 0.9rem; line-height: 1.7;
+    }
+    .empty .big { font-size: 2rem; margin-bottom: 8px; opacity: 0.7; }
+
+    .skeleton {
+      height: 14px; border-radius: 8px; margin: 12px 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.09), rgba(255,255,255,0.04));
+      background-size: 200% 100%; animation: shimmer 1.2s infinite linear;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    .notice {
+      display: none; margin-bottom: 14px; padding: 14px 16px; border-radius: 14px;
+      background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.25);
+      color: #fdba74; font-size: 0.88rem; line-height: 1.6;
+    }
+
+    .status {
+      margin-top: 18px; color: var(--muted); font-size: 0.8rem;
+      display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+    }
+    .status .dot-ok { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+    .footer {
+      margin-top: 28px; text-align: center; color: var(--muted); font-size: 0.82rem;
+    }
+    .footer a {
+      color: var(--purple); text-decoration: none; font-weight: 700;
+    }
+    .footer a:hover { text-decoration: underline; }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 600;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--stroke); color: var(--muted);
+    }
   </style>
 </head>
 <body>
+  <div class="noise" aria-hidden="true"></div>
   <div class="wrap">
-    <header>
-      <div>
-        <h1>📊 لوحة التحليلات المباشرة</h1>
-        <p class="sub">لاندِكس • صفحات هبوط عربية عالية التحويل</p>
+    <header class="top">
+      <div class="brand">
+        <div class="logo">Lx</div>
+        <div>
+          <h1>لوحة تحكم لاندِكس</h1>
+          <p class="sub">تحليلات مباشرة للزيارات والدول — جاهزة لعرض العميل</p>
+        </div>
       </div>
-      <div class="badge"><span class="dot"></span> بث مباشر</div>
+      <div class="live"><span class="pulse"></span> بث مباشر</div>
     </header>
 
     <div class="notice" id="notice"></div>
 
     <div class="tabs" id="dayTabs">
-      <button type="button" data-days="1">آخر 24 ساعة</button>
-      <button type="button" data-days="2">آخر 48 ساعة</button>
-      <button type="button" data-days="3" class="active">آخر 72 ساعة</button>
+      <button type="button" data-days="1">24 ساعة</button>
+      <button type="button" data-days="2">48 ساعة</button>
+      <button type="button" data-days="3" class="active">72 ساعة</button>
     </div>
 
-    <div class="grid">
-      <div class="card"><div class="label">إجمالي الزيارات (كل الوقت)</div><div class="value" id="kpiTotal">…</div><div class="hint">عداد عام — يعمل دائماً</div></div>
-      <div class="card"><div class="label">جلسات Clarity</div><div class="value" id="kpiSessions">…</div><div class="hint">الفترة المحددة</div></div>
-      <div class="card"><div class="label">زوار فريدون</div><div class="value" id="kpiUsers">…</div><div class="hint">Distinct users</div></div>
-      <div class="card"><div class="label">عمق التمرير</div><div class="value" id="kpiScroll">…</div><div class="hint">متوسط %</div></div>
-    </div>
+    <section class="kpis">
+      <article class="kpi v">
+        <div class="label"><span>إجمالي الزيارات</span><span class="icon">👁</span></div>
+        <div class="value" id="kpiTotal">—</div>
+        <div class="hint">عداد دائم · لا يعتمد على Clarity</div>
+      </article>
+      <article class="kpi s">
+        <div class="label"><span>جلسات</span><span class="icon">⚡</span></div>
+        <div class="value" id="kpiSessions">—</div>
+        <div class="hint">Microsoft Clarity</div>
+      </article>
+      <article class="kpi u">
+        <div class="label"><span>زوار فريدون</span><span class="icon">👤</span></div>
+        <div class="value" id="kpiUsers">—</div>
+        <div class="hint">Distinct users</div>
+      </article>
+      <article class="kpi d">
+        <div class="label"><span>عمق التمرير</span><span class="icon">↓</span></div>
+        <div class="value" id="kpiScroll">—</div>
+        <div class="hint">متوسط النسبة</div>
+      </article>
+    </section>
 
-    <div class="panels">
-      <div class="card panel"><h2>🌍 الدول</h2><div id="countries"><div class="empty">جاري تحميل الدول (عداد مستقل)…</div></div></div>
-      <div class="card panel"><h2>📱 الأجهزة</h2><div id="devices"><div class="empty">جاري التحميل…</div></div></div>
-      <div class="card panel"><h2>🌐 المتصفحات</h2><div id="browsers"><div class="empty">جاري التحميل…</div></div></div>
-      <div class="card panel"><h2>💻 أنظمة التشغيل</h2><div id="os"><div class="empty">جاري التحميل…</div></div></div>
-    </div>
+    <section class="panels">
+      <article class="panel countries">
+        <h2>🌍 الدول <span class="tag">دائم · بدون حد يومي</span></h2>
+        <div id="countries"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+      </article>
+      <article class="panel">
+        <h2>📱 الأجهزة</h2>
+        <div id="devices"><div class="skeleton"></div><div class="skeleton"></div></div>
+      </article>
+      <article class="panel">
+        <h2>🌐 المتصفحات</h2>
+        <div id="browsers"><div class="skeleton"></div><div class="skeleton"></div></div>
+      </article>
+      <article class="panel">
+        <h2>💻 أنظمة التشغيل</h2>
+        <div id="os"><div class="skeleton"></div><div class="skeleton"></div></div>
+      </article>
+    </section>
 
-    <p class="status" id="status">تحديث…</p>
-    <p class="footer"><a href="/">← العودة لصفحة الهبوط</a> · تحديث كل 10 دقائق لتجنب حد Clarity</p>
+    <p class="status" id="status"><span class="dot-ok"></span> جاري التحميل…</p>
+    <p class="footer">
+      <a href="/">← العودة لصفحة الهبوط</a>
+      · لاندِكس Analytics · تحديث كل 10 دقائق
+    </p>
   </div>
 
   <script>
@@ -93,12 +338,26 @@
       ["CA","كندا"],["TR","تركيا"],["IT","إيطاليا"],["ES","إسبانيا"],
       ["BE","بلجيكا"],["NL","هولندا"],["CH","سويسرا"],["SE","السويد"]
     ];
-    var COUNTRY_AR = {};
-    COUNTRY_LIST.forEach(function (x) { COUNTRY_AR[x[0]] = x[1]; });
 
     function fmt(n) {
       if (n == null || isNaN(n)) return "—";
       try { return Number(n).toLocaleString("ar-DZ"); } catch (e) { return String(n); }
+    }
+    function animateNumber(el, to) {
+      if (to == null || isNaN(to)) { el.textContent = "—"; return; }
+      var start = 0;
+      var from = parseInt(String(el.textContent).replace(/[^\d]/g), "") || "0", 10) || 0;
+      var diff = to - from;
+      if (diff === 0) { el.textContent = fmt(to); return; }
+      var t0 = performance.now();
+      var dur = 700;
+      function frame(t) {
+        var p = Math.min(1, (t - t0) / dur);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(Math.round(from + diff * eased));
+        if (p < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
     }
     function pick(metrics, name) {
       if (!Array.isArray(metrics)) return null;
@@ -120,33 +379,52 @@
       rows.sort(function (a, b) { return b.value - a.value; });
       return rows;
     }
-    function renderTable(el, rows, map) {
+    function renderRows(el, rows, withFlags) {
       if (!rows || !rows.length) {
-        el.innerHTML = '<div class="empty">لا بيانات بعد — افتح صفحة الهبوط لتسجيل أول دولة.</div>';
+        el.innerHTML = '<div class="empty"><div class="big">◌</div>لا بيانات بعد.<br>افتح صفحة الهبوط مرة واحدة لتسجيل زيارة.</div>';
         return;
       }
       var max = Math.max.apply(null, rows.map(function (r) { return r.value; })) || 1;
-      var html = "<table><thead><tr><th>الاسم</th><th>العدد</th></tr></thead><tbody>";
-      rows.slice(0, 15).forEach(function (r) {
-        var code = r.code || "";
-        var name = (map && map[r.label]) || r.label;
-        var flag = code ? '<img src="https://flagcdn.com/24x18/' + code.toLowerCase() + '.png" width="24" height="18" alt="" style="border-radius:2px;vertical-align:middle;margin-left:8px" onerror="this.style.display=\'none\'">' : "";
+      var html = "";
+      rows.slice(0, 12).forEach(function (r) {
         var pct = Math.round((r.value / max) * 100);
-        html += "<tr><td>" + flag + name + '<div class="bar-wrap"><div class="bar" style="width:' + pct + '%"></div></div></td><td class="num">' + fmt(r.value) + "</td></tr>";
+        var flag = "";
+        if (withFlags && r.code) {
+          flag = '<img class="flag" src="https://flagcdn.com/40x30/' + r.code.toLowerCase() + '.png" alt="" loading="lazy" onerror="this.outerHTML=\'<span class=flag-fallback>' + r.code + '</span>\'">';
+        } else {
+          flag = '<span class="flag-fallback">•</span>';
+        }
+        html += '<div class="row">' +
+          flag +
+          '<div><div class="name">' + r.label + '</div><div class="bar-track"><div class="bar-fill" style="width:0%" data-w="' + pct + '%"></div></div></div>' +
+          '<div class="num">' + fmt(r.value) + '</div></div>';
       });
-      html += "</tbody></table>";
       el.innerHTML = html;
+      requestAnimationFrame(function () {
+        el.querySelectorAll(".bar-fill").forEach(function (b) {
+          b.style.width = b.getAttribute("data-w");
+        });
+      });
     }
     async function api(path) {
       var r = await fetch(path, { cache: "no-store" });
       var j = await r.json().catch(function () { return {}; });
       return { ok: r.ok, status: r.status, body: j };
     }
+    async function loadTotal() {
+      try {
+        var r = await fetch("https://countapi.mileshilliard.com/api/v1/get/" + NS + "-visits", { mode: "cors", cache: "no-store" });
+        var j = await r.json();
+        if (j && j.value != null) animateNumber(document.getElementById("kpiTotal"), Number(j.value));
+      } catch (e) {
+        document.getElementById("kpiTotal").textContent = "—";
+      }
+    }
     async function loadCountriesAlways() {
       var rows = [];
       await Promise.all(COUNTRY_LIST.map(function (pair) {
         var code = pair[0], name = pair[1];
-        return fetch("https://countapi.mileshilliard.com/api/v1/get/" + NS + "-cc-" + code, { cache: "no-store", mode: "cors" })
+        return fetch("https://countapi.mileshilliard.com/api/v1/get/" + NS + "-cc-" + code, { mode: "cors", cache: "no-store" })
           .then(function (r) { return r.json(); })
           .then(function (d) {
             if (d && d.value > 0) rows.push({ label: name, code: code, value: Number(d.value) });
@@ -154,55 +432,56 @@
           .catch(function () {});
       }));
       rows.sort(function (a, b) { return b.value - a.value; });
-      renderTable(document.getElementById("countries"), rows, COUNTRY_AR);
+      renderRows(document.getElementById("countries"), rows, true);
       return rows.length;
-    }
-    async function loadTotal() {
-      try {
-        var r = await fetch("https://countapi.mileshilliard.com/api/v1/get/" + NS + "-visits", { cache: "no-store" });
-        var j = await r.json();
-        if (j && j.value != null) document.getElementById("kpiTotal").textContent = fmt(j.value);
-      } catch (e) {
-        document.getElementById("kpiTotal").textContent = "—";
-      }
     }
     async function refresh() {
       var status = document.getElementById("status");
       var notice = document.getElementById("notice");
-      status.className = "status";
-      status.textContent = "جاري التحديث…";
       notice.style.display = "none";
+      status.innerHTML = '<span class="dot-ok"></span> جاري التحديث…';
+
       await loadTotal();
       var nCountries = await loadCountriesAlways();
 
       var base = await api("/api/clarity?days=" + days);
       if (base.status === 429 || (base.body && base.body.status === 429)) {
         notice.style.display = "block";
-        notice.textContent = "ℹ️ تفاصيل Clarity (أجهزة/متصفحات) محدودة اليوم. الدول والزيارات تعمل دائماً من العداد المستقل.";
+        notice.textContent = "تفاصيل Clarity (أجهزة / متصفحات) محدودة مؤقتاً بسبب الحد اليومي المجاني. الزيارات والدول تعمل دائماً.";
+        document.getElementById("kpiSessions").textContent = "—";
+        document.getElementById("kpiUsers").textContent = "—";
+        document.getElementById("kpiScroll").textContent = "—";
+        ["devices", "browsers", "os"].forEach(function (id) {
+          document.getElementById(id).innerHTML = '<div class="empty"><div class="big">◌</div>متاح بعد إعادة ضبط حد Clarity</div>';
+        });
       } else if (base.ok && base.body && base.body.ok) {
         var metrics = base.body.metrics || [];
         var traffic = pick(metrics, "Traffic");
         var t0 = traffic && traffic.information && traffic.information[0];
-        document.getElementById("kpiSessions").textContent = fmt(t0 && (t0.totalSessionCount || t0.sessionsCount));
-        document.getElementById("kpiUsers").textContent = fmt(t0 && t0.distinctUserCount);
+        animateNumber(document.getElementById("kpiSessions"), t0 && (t0.totalSessionCount || t0.sessionsCount));
+        animateNumber(document.getElementById("kpiUsers"), t0 && t0.distinctUserCount);
         var scroll = pick(metrics, "ScrollDepth");
         var s0 = scroll && scroll.information && scroll.information[0];
         document.getElementById("kpiScroll").textContent =
           s0 && s0.averageScrollDepth != null ? Math.round(s0.averageScrollDepth) + "%" : "—";
-        renderTable(document.getElementById("devices"), rowsFrom(pick(metrics, "Device")));
-        renderTable(document.getElementById("browsers"), rowsFrom(pick(metrics, "Browser")));
-        renderTable(document.getElementById("os"), rowsFrom(pick(metrics, "OS")));
+        renderRows(document.getElementById("devices"), rowsFrom(pick(metrics, "Device")), false);
+        renderRows(document.getElementById("browsers"), rowsFrom(pick(metrics, "Browser")), false);
+        renderRows(document.getElementById("os"), rowsFrom(pick(metrics, "OS")), false);
       } else {
         document.getElementById("kpiSessions").textContent = "—";
         document.getElementById("kpiUsers").textContent = "—";
         document.getElementById("kpiScroll").textContent = "—";
-        ["devices","browsers","os"].forEach(function(id){
-          document.getElementById(id).innerHTML = '<div class="empty">متاح عند عمل Clarity API</div>';
+        ["devices", "browsers", "os"].forEach(function (id) {
+          document.getElementById(id).innerHTML = '<div class="empty"><div class="big">◌</div>Clarity غير متصل</div>';
         });
       }
-      status.textContent = "آخر تحديث: " + new Date().toLocaleString("ar-DZ") +
-        " · دول مسجّلة: " + nCountries + " · تحديث كل 10 دقائق";
+
+      status.innerHTML = '<span class="dot-ok"></span> آخر تحديث: ' +
+        new Date().toLocaleString("ar-DZ") +
+        ' · دول: ' + nCountries +
+        ' · <span class="chip">cache 10 دقائق</span>';
     }
+
     document.getElementById("dayTabs").addEventListener("click", function (e) {
       var btn = e.target.closest("button[data-days]");
       if (!btn) return;
@@ -211,6 +490,7 @@
       btn.classList.add("active");
       refresh();
     });
+
     refresh();
     setInterval(refresh, 10 * 60 * 1000);
   })();
