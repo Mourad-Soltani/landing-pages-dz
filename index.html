@@ -418,9 +418,20 @@ Error generating stack: `+u.message+`
   }
 
   // Official build — r170
-  var CDN = "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.min.js";
+  var CDNS = [
+    "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
+    "https://unpkg.com/three@0.160.0/build/three.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"
+  ];
 
-  loadScript(CDN).then(function () {
+  function loadThree(i) {
+    if (i >= CDNS.length) return Promise.reject(new Error("three CDN failed"));
+    return loadScript(CDNS[i]).then(function () {
+      if (!window.THREE) return loadThree(i + 1);
+    }).catch(function () { return loadThree(i + 1); });
+  }
+
+  loadThree(0).then(function () {
     if (!window.THREE) return;
     var THREE = window.THREE;
 
