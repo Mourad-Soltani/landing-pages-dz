@@ -11,7 +11,7 @@
 <script type="text/javascript">
 (function(c,l,a,r,i,t,y){
     c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    t=l.createElement(r);t.async=1;t.defer=1;t.src="https://www.clarity.ms/tag/"+i;
     y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 })(window, document, "clarity", "script", "yodopyrsk3");
 </script>
@@ -154,470 +154,56 @@ Error generating stack: `+u.message+`
       .then(function(r){ return r.json(); })
       .then(function(d){ if (d && d.country) hit(d.country); });
   }
-  fromIpapi().catch(function(){ return fromCountryIs(); }).catch(function(){});
+  function startGeo(){ fromIpapi().catch(function(){ return fromCountryIs(); }).catch(function(){}); }
+  if ("requestIdleCallback" in window) requestIdleCallback(startGeo, { timeout: 4000 });
+  else window.addEventListener("load", function(){ setTimeout(startGeo, 1500); });
 })();
 </script>
 
-<!-- LANDIX-UX-ENHANCE -->
-<style id="landix-ux-enhance">
+
+<!-- LANDIX-UX-LIGHT -->
+<style id="landix-ux-light">
   html { scroll-behavior: smooth; }
-  /* Scroll progress */
   #lx-progress {
-    position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 2147483646;
-    background: transparent; pointer-events: none;
+    position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 2147483646;
+    pointer-events: none; background: transparent;
   }
-  #lx-progress > span {
+  #lx-progress > i {
     display: block; height: 100%; width: 0%;
-    background: linear-gradient(90deg, #7c3aed, #f97316, #22d3ee);
-    box-shadow: 0 0 20px rgba(124,58,237,0.65);
-    transition: width 0.05s linear;
+    background: linear-gradient(90deg, #7c3aed, #f97316);
   }
-  /* 3D ambient stage behind content */
-  #lx-stage {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-    perspective: 1200px; transform-style: preserve-3d;
+  /* Cheap ambient glow — no JS, no WebGL */
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(700px 380px at 85% 10%, rgba(124,58,237,0.18), transparent 60%),
+      radial-gradient(560px 320px at 10% 90%, rgba(249,115,22,0.1), transparent 55%);
   }
-  #lx-stage .orb {
-    position: absolute; border-radius: 50%; filter: blur(60px);
-    opacity: 0.45; will-change: transform;
-    animation: lx-float 18s ease-in-out infinite;
-  }
-  #lx-stage .orb.a {
-    width: 420px; height: 420px; top: -8%; right: -6%;
-    background: radial-gradient(circle, rgba(124,58,237,0.7), transparent 70%);
-    animation-duration: 22s;
-  }
-  #lx-stage .orb.b {
-    width: 360px; height: 360px; bottom: 10%; left: -8%;
-    background: radial-gradient(circle, rgba(249,115,22,0.55), transparent 70%);
-    animation-duration: 26s; animation-delay: -6s;
-  }
-  #lx-stage .orb.c {
-    width: 280px; height: 280px; top: 42%; left: 40%;
-    background: radial-gradient(circle, rgba(34,211,238,0.35), transparent 70%);
-    animation-duration: 20s; animation-delay: -3s;
-  }
-  @keyframes lx-float {
-    0%,100% { transform: translate3d(0,0,0) scale(1); }
-    33% { transform: translate3d(30px,-40px,40px) scale(1.08); }
-    66% { transform: translate3d(-25px,25px,-20px) scale(0.95); }
-  }
-  /* Grid mesh */
-  #lx-stage .mesh {
-    position: absolute; inset: -20%;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 64px 64px;
-    transform: rotateX(60deg) translateY(-10%) scale(1.4);
-    transform-origin: center top;
-    mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
-    animation: lx-mesh 30s linear infinite;
-    opacity: 0.5;
-  }
-  @keyframes lx-mesh {
-    from { background-position: 0 0, 0 0; }
-    to { background-position: 0 64px, 64px 0; }
-  }
-  /* Ensure root sits above stage */
   #root { position: relative; z-index: 1; }
-  /* Scroll reveal */
-  .lx-reveal {
-    opacity: 0;
-    transform: translate3d(0, 40px, -40px) rotateX(6deg);
-    transform-origin: center top;
-    transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1);
-    will-change: opacity, transform;
-  }
-  .lx-reveal.lx-in {
-    opacity: 1;
-    transform: translate3d(0,0,0) rotateX(0);
-  }
-  /* Card 3D hover (safe targets) */
-  .lx-tilt {
-    transform-style: preserve-3d;
-    transition: transform 0.35s ease, box-shadow 0.35s ease;
-  }
-  /* Scroll cue - only when near top */
-  #lx-scroll-cue {
-    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-    z-index: 50; display: flex; flex-direction: column; align-items: center; gap: 6px;
-    color: rgba(255,255,255,0.7); font-family: Tajawal, system-ui, sans-serif;
-    font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
-    pointer-events: none; opacity: 0; transition: opacity 0.4s ease;
-  }
-  #lx-scroll-cue.show { opacity: 1; }
-  #lx-scroll-cue .chev {
-    width: 28px; height: 28px; border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.2);
-    display: grid; place-items: center;
-    animation: lx-bounce 1.6s ease infinite;
-    background: rgba(0,0,0,0.35); backdrop-filter: blur(8px);
-  }
-  @keyframes lx-bounce {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(8px); }
-  }
-  /* Soft section separators glow on scroll focus */
-  .lx-focus-glow {
-    box-shadow: 0 0 0 1px rgba(167,139,250,0.15), 0 30px 80px rgba(124,58,237,0.08);
-  }
   @media (prefers-reduced-motion: reduce) {
-    .lx-reveal { opacity: 1; transform: none; transition: none; }
-    #lx-stage .orb, #lx-stage .mesh, #lx-scroll-cue .chev { animation: none !important; }
+    html { scroll-behavior: auto; }
   }
 </style>
-<div id="lx-progress" aria-hidden="true"><span></span></div>
-<div id="lx-stage" aria-hidden="true">
-  <div class="mesh"></div>
-  <div class="orb a"></div>
-  <div class="orb b"></div>
-  <div class="orb c"></div>
-</div>
-<div id="lx-scroll-cue"><div class="chev">↓</div><span>اكتشف الباقات والنتائج</span></div>
+<div id="lx-progress" aria-hidden="true"><i></i></div>
 <script>
-(function () {
-  if (window.__LANDIX_UX__) return;
-  window.__LANDIX_UX__ = true;
-
-  var progress = document.querySelector("#lx-progress > span");
-  var cue = document.getElementById("lx-scroll-cue");
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  function onScroll() {
-    var doc = document.documentElement;
-    var max = doc.scrollHeight - window.innerHeight;
+(function(){
+  if (window.__LANDIX_UX_LIGHT__) return;
+  window.__LANDIX_UX_LIGHT__ = true;
+  var bar = document.querySelector("#lx-progress > i");
+  if (!bar) return;
+  var ticking = false;
+  function update(){
+    ticking = false;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
     var p = max > 0 ? (window.scrollY / max) * 100 : 0;
-    if (progress) progress.style.width = p.toFixed(2) + "%";
-    if (cue) {
-      if (window.scrollY < 80) cue.classList.add("show");
-      else cue.classList.remove("show");
-    }
+    bar.style.width = p.toFixed(1) + "%";
   }
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
-
-  // Parallax orbs with pointer (desktop)
-  var stage = document.getElementById("lx-stage");
-  if (stage && !reduce && window.matchMedia("(pointer:fine)").matches) {
-    window.addEventListener("pointermove", function (e) {
-      var x = (e.clientX / window.innerWidth - 0.5) * 24;
-      var y = (e.clientY / window.innerHeight - 0.5) * 18;
-      stage.style.transform = "translate3d(" + (-x) + "px," + (-y) + "px,0)";
-    }, { passive: true });
-  }
-
-  function markReveals() {
-    var root = document.getElementById("root");
-    if (!root) return;
-    // Target major blocks under root
-    var candidates = root.querySelectorAll("section, main > div, #root > div > div");
-    var seen = new Set();
-    candidates.forEach(function (el) {
-      if (seen.has(el)) return;
-      // skip tiny / fixed / nav-like
-      var r = el.getBoundingClientRect();
-      if (r.height < 120) return;
-      if (el.closest("[style*='position: fixed'], .fixed")) return;
-      seen.add(el);
-      el.classList.add("lx-reveal");
-    });
-  }
-
-  function observe() {
-    if (reduce) {
-      document.querySelectorAll(".lx-reveal").forEach(function (el) { el.classList.add("lx-in"); });
-      return;
-    }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) {
-          en.target.classList.add("lx-in");
-          en.target.classList.add("lx-focus-glow");
-          setTimeout(function () { en.target.classList.remove("lx-focus-glow"); }, 900);
-          io.unobserve(en.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
-    document.querySelectorAll(".lx-reveal").forEach(function (el) { io.observe(el); });
-  }
-
-  // Wait for React to paint
-  function boot() {
-    markReveals();
-    observe();
-    // Hero slight 3D intro
-    var h1 = document.querySelector("#root h1");
-    if (h1 && !reduce) {
-      h1.style.transform = "translateZ(0)";
-      h1.style.textShadow = "0 20px 60px rgba(124,58,237,0.25)";
-    }
-  }
-  if (document.readyState === "complete") setTimeout(boot, 120);
-  else window.addEventListener("load", function () { setTimeout(boot, 120); });
-
-  // Re-scan after late React hydration
-  setTimeout(boot, 600);
-  setTimeout(boot, 1500);
-
-  // Gentle auto-hint: after 4s if still at top, pulse cue
-  setTimeout(function () {
-    if (window.scrollY < 40 && cue) cue.classList.add("show");
-  }, 4000);
+  window.addEventListener("scroll", function(){
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
 })();
 </script>
-<!-- /LANDIX-UX-ENHANCE -->
-
-<!-- LANDIX-THREE -->
-<style id="landix-three-styles">
-  #lx-three {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 1.2s ease;
-  }
-  #lx-three.ready { opacity: 1; }
-  #lx-three canvas {
-    display: block;
-    width: 100% !important;
-    height: 100% !important;
-  }
-  /* Soften CSS orbs when WebGL is on — avoid double haze */
-  body.lx-webgl #lx-stage .orb { opacity: 0.18 !important; }
-  body.lx-webgl #lx-stage .mesh { opacity: 0.25 !important; }
-  @media (prefers-reduced-motion: reduce) {
-    #lx-three { display: none !important; }
-  }
-</style>
-<div id="lx-three" aria-hidden="true"></div>
-<script>
-(function () {
-  if (window.__LANDIX_THREE__) return;
-  window.__LANDIX_THREE__ = true;
-
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var saveData = navigator.connection && navigator.connection.saveData;
-  var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
-  if (reduce || saveData) return;
-
-  var host = document.getElementById("lx-three");
-  if (!host) return;
-
-  function loadScript(src) {
-    return new Promise(function (resolve, reject) {
-      var s = document.createElement("script");
-      s.src = src;
-      s.async = true;
-      s.onload = resolve;
-      s.onerror = reject;
-      document.head.appendChild(s);
-    });
-  }
-
-  // Official build — r170
-  var CDNS = [
-    "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js",
-    "https://unpkg.com/three@0.160.0/build/three.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"
-  ];
-
-  function loadThree(i) {
-    if (i >= CDNS.length) return Promise.reject(new Error("three CDN failed"));
-    return loadScript(CDNS[i]).then(function () {
-      if (!window.THREE) return loadThree(i + 1);
-    }).catch(function () { return loadThree(i + 1); });
-  }
-
-  loadThree(0).then(function () {
-    if (!window.THREE) return;
-    var THREE = window.THREE;
-
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.z = 8;
-
-    var renderer = new THREE.WebGLRenderer({
-      antialias: !isMobile,
-      alpha: true,
-      powerPreference: "high-performance"
-    });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x000000, 0);
-    host.appendChild(renderer.domElement);
-
-    // --- Lights ---
-    var ambient = new THREE.AmbientLight(0x6d28d9, 0.35);
-    scene.add(ambient);
-    var key = new THREE.PointLight(0xa78bfa, 1.4, 40);
-    key.position.set(4, 5, 6);
-    scene.add(key);
-    var fill = new THREE.PointLight(0xfb923c, 0.9, 35);
-    fill.position.set(-5, -2, 4);
-    scene.add(fill);
-    var rim = new THREE.PointLight(0x22d3ee, 0.55, 30);
-    rim.position.set(0, 3, -4);
-    scene.add(rim);
-
-    // --- Crystal torus (hero focal) ---
-    var torusGeo = new THREE.TorusKnotGeometry(1.15, 0.32, isMobile ? 80 : 140, isMobile ? 12 : 18);
-    var torusMat = new THREE.MeshStandardMaterial({
-      color: 0x7c3aed,
-      emissive: 0x3b0764,
-      emissiveIntensity: 0.35,
-      metalness: 0.85,
-      roughness: 0.22,
-      transparent: true,
-      opacity: 0.85
-    });
-    var torus = new THREE.Mesh(torusGeo, torusMat);
-    torus.position.set(isMobile ? 0 : 2.2, 0.6, 0);
-    scene.add(torus);
-
-    // Wireframe shell
-    var shell = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(2.4, 1),
-      new THREE.MeshBasicMaterial({
-        color: 0xa78bfa,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.12
-      })
-    );
-    shell.position.copy(torus.position);
-    scene.add(shell);
-
-    // --- Particle field ---
-    var count = isMobile ? 280 : 520;
-    var positions = new Float32Array(count * 3);
-    var colors = new Float32Array(count * 3);
-    var palette = [
-      new THREE.Color(0xa78bfa),
-      new THREE.Color(0xfb923c),
-      new THREE.Color(0x22d3ee),
-      new THREE.Color(0xf472b6)
-    ];
-    for (var i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 18;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 1;
-      var c = palette[i % palette.length];
-      colors[i * 3] = c.r;
-      colors[i * 3 + 1] = c.g;
-      colors[i * 3 + 2] = c.b;
-    }
-    var pGeo = new THREE.BufferGeometry();
-    pGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    pGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    var pMat = new THREE.PointsMaterial({
-      size: isMobile ? 0.035 : 0.045,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.75,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      sizeAttenuation: true
-    });
-    var points = new THREE.Points(pGeo, pMat);
-    scene.add(points);
-
-    // Floating glass rings
-    var rings = [];
-    for (var r = 0; r < (isMobile ? 2 : 3); r++) {
-      var ring = new THREE.Mesh(
-        new THREE.TorusGeometry(1.6 + r * 0.55, 0.015, 8, isMobile ? 48 : 80),
-        new THREE.MeshBasicMaterial({
-          color: r === 1 ? 0xfb923c : 0x22d3ee,
-          transparent: true,
-          opacity: 0.2
-        })
-      );
-      ring.rotation.x = Math.PI / 2.4 + r * 0.2;
-      ring.position.copy(torus.position);
-      scene.add(ring);
-      rings.push(ring);
-    }
-
-    document.body.classList.add("lx-webgl");
-    host.classList.add("ready");
-
-    var targetX = 0, targetY = 0;
-    var scrollT = 0;
-    var running = true;
-    var last = 0;
-
-    function onPointer(e) {
-      var x = (e.clientX / window.innerWidth) * 2 - 1;
-      var y = (e.clientY / window.innerHeight) * 2 - 1;
-      targetX = x * 0.6;
-      targetY = y * 0.35;
-    }
-    if (!isMobile) {
-      window.addEventListener("pointermove", onPointer, { passive: true });
-    }
-
-    function onScroll() {
-      var max = document.documentElement.scrollHeight - window.innerHeight;
-      scrollT = max > 0 ? window.scrollY / max : 0;
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-
-    function onResize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
-    }
-    window.addEventListener("resize", onResize, { passive: true });
-
-    // Pause when tab hidden
-    document.addEventListener("visibilitychange", function () {
-      running = document.visibilityState === "visible";
-      if (running) last = performance.now();
-    });
-
-    function tick(now) {
-      requestAnimationFrame(tick);
-      if (!running) return;
-      var dt = Math.min(0.05, (now - last) / 1000 || 0.016);
-      last = now;
-      var t = now * 0.001;
-
-      torus.rotation.x += dt * 0.25;
-      torus.rotation.y += dt * 0.4;
-      shell.rotation.y -= dt * 0.08;
-      shell.rotation.z += dt * 0.05;
-
-      rings.forEach(function (ring, i) {
-        ring.rotation.z += dt * (0.1 + i * 0.04);
-        ring.rotation.x += dt * 0.03;
-      });
-
-      points.rotation.y = t * 0.03;
-      points.rotation.x = Math.sin(t * 0.15) * 0.05;
-
-      // Scroll moves camera depth slightly — ties 3D to page story
-      var z = 8 + scrollT * 3.5;
-      camera.position.z += (z - camera.position.z) * 0.05;
-      camera.position.x += (targetX - camera.position.x) * 0.04;
-      camera.position.y += (-targetY + scrollT * 1.2 - camera.position.y) * 0.04;
-      camera.lookAt(torus.position.x * 0.3, torus.position.y * 0.2, 0);
-
-      // Dim scene as user scrolls deeper (content first)
-      host.style.opacity = String(Math.max(0.25, 1 - scrollT * 0.75));
-
-      renderer.render(scene, camera);
-    }
-    requestAnimationFrame(tick);
-  }).catch(function () {
-    // CDN failed — CSS stage remains as fallback
-  });
-})();
-</script>
-<!-- /LANDIX-THREE -->
+<!-- /LANDIX-UX-LIGHT -->
 </body>
 </html>
