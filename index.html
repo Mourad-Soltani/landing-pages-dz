@@ -368,5 +368,245 @@ Error generating stack: `+u.message+`
 })();
 </script>
 <!-- /LANDIX-UX-ENHANCE -->
+
+<!-- LANDIX-THREE -->
+<style id="landix-three-styles">
+  #lx-three {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  #lx-three.ready { opacity: 1; }
+  #lx-three canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  /* Soften CSS orbs when WebGL is on — avoid double haze */
+  body.lx-webgl #lx-stage .orb { opacity: 0.18 !important; }
+  body.lx-webgl #lx-stage .mesh { opacity: 0.25 !important; }
+  @media (prefers-reduced-motion: reduce) {
+    #lx-three { display: none !important; }
+  }
+</style>
+<div id="lx-three" aria-hidden="true"></div>
+<script>
+(function () {
+  if (window.__LANDIX_THREE__) return;
+  window.__LANDIX_THREE__ = true;
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var saveData = navigator.connection && navigator.connection.saveData;
+  var isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || window.innerWidth < 768;
+  if (reduce || saveData) return;
+
+  var host = document.getElementById("lx-three");
+  if (!host) return;
+
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.async = true;
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  // Official build — r170
+  var CDN = "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.min.js";
+
+  loadScript(CDN).then(function () {
+    if (!window.THREE) return;
+    var THREE = window.THREE;
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 8;
+
+    var renderer = new THREE.WebGLRenderer({
+      antialias: !isMobile,
+      alpha: true,
+      powerPreference: "high-performance"
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    host.appendChild(renderer.domElement);
+
+    // --- Lights ---
+    var ambient = new THREE.AmbientLight(0x6d28d9, 0.35);
+    scene.add(ambient);
+    var key = new THREE.PointLight(0xa78bfa, 1.4, 40);
+    key.position.set(4, 5, 6);
+    scene.add(key);
+    var fill = new THREE.PointLight(0xfb923c, 0.9, 35);
+    fill.position.set(-5, -2, 4);
+    scene.add(fill);
+    var rim = new THREE.PointLight(0x22d3ee, 0.55, 30);
+    rim.position.set(0, 3, -4);
+    scene.add(rim);
+
+    // --- Crystal torus (hero focal) ---
+    var torusGeo = new THREE.TorusKnotGeometry(1.15, 0.32, isMobile ? 80 : 140, isMobile ? 12 : 18);
+    var torusMat = new THREE.MeshStandardMaterial({
+      color: 0x7c3aed,
+      emissive: 0x3b0764,
+      emissiveIntensity: 0.35,
+      metalness: 0.85,
+      roughness: 0.22,
+      transparent: true,
+      opacity: 0.85
+    });
+    var torus = new THREE.Mesh(torusGeo, torusMat);
+    torus.position.set(isMobile ? 0 : 2.2, 0.6, 0);
+    scene.add(torus);
+
+    // Wireframe shell
+    var shell = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(2.4, 1),
+      new THREE.MeshBasicMaterial({
+        color: 0xa78bfa,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.12
+      })
+    );
+    shell.position.copy(torus.position);
+    scene.add(shell);
+
+    // --- Particle field ---
+    var count = isMobile ? 280 : 520;
+    var positions = new Float32Array(count * 3);
+    var colors = new Float32Array(count * 3);
+    var palette = [
+      new THREE.Color(0xa78bfa),
+      new THREE.Color(0xfb923c),
+      new THREE.Color(0x22d3ee),
+      new THREE.Color(0xf472b6)
+    ];
+    for (var i = 0; i < count; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 18;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 1;
+      var c = palette[i % palette.length];
+      colors[i * 3] = c.r;
+      colors[i * 3 + 1] = c.g;
+      colors[i * 3 + 2] = c.b;
+    }
+    var pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    pGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    var pMat = new THREE.PointsMaterial({
+      size: isMobile ? 0.035 : 0.045,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.75,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true
+    });
+    var points = new THREE.Points(pGeo, pMat);
+    scene.add(points);
+
+    // Floating glass rings
+    var rings = [];
+    for (var r = 0; r < (isMobile ? 2 : 3); r++) {
+      var ring = new THREE.Mesh(
+        new THREE.TorusGeometry(1.6 + r * 0.55, 0.015, 8, isMobile ? 48 : 80),
+        new THREE.MeshBasicMaterial({
+          color: r === 1 ? 0xfb923c : 0x22d3ee,
+          transparent: true,
+          opacity: 0.2
+        })
+      );
+      ring.rotation.x = Math.PI / 2.4 + r * 0.2;
+      ring.position.copy(torus.position);
+      scene.add(ring);
+      rings.push(ring);
+    }
+
+    document.body.classList.add("lx-webgl");
+    host.classList.add("ready");
+
+    var targetX = 0, targetY = 0;
+    var scrollT = 0;
+    var running = true;
+    var last = 0;
+
+    function onPointer(e) {
+      var x = (e.clientX / window.innerWidth) * 2 - 1;
+      var y = (e.clientY / window.innerHeight) * 2 - 1;
+      targetX = x * 0.6;
+      targetY = y * 0.35;
+    }
+    if (!isMobile) {
+      window.addEventListener("pointermove", onPointer, { passive: true });
+    }
+
+    function onScroll() {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      scrollT = max > 0 ? window.scrollY / max : 0;
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
+    }
+    window.addEventListener("resize", onResize, { passive: true });
+
+    // Pause when tab hidden
+    document.addEventListener("visibilitychange", function () {
+      running = document.visibilityState === "visible";
+      if (running) last = performance.now();
+    });
+
+    function tick(now) {
+      requestAnimationFrame(tick);
+      if (!running) return;
+      var dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+      last = now;
+      var t = now * 0.001;
+
+      torus.rotation.x += dt * 0.25;
+      torus.rotation.y += dt * 0.4;
+      shell.rotation.y -= dt * 0.08;
+      shell.rotation.z += dt * 0.05;
+
+      rings.forEach(function (ring, i) {
+        ring.rotation.z += dt * (0.1 + i * 0.04);
+        ring.rotation.x += dt * 0.03;
+      });
+
+      points.rotation.y = t * 0.03;
+      points.rotation.x = Math.sin(t * 0.15) * 0.05;
+
+      // Scroll moves camera depth slightly — ties 3D to page story
+      var z = 8 + scrollT * 3.5;
+      camera.position.z += (z - camera.position.z) * 0.05;
+      camera.position.x += (targetX - camera.position.x) * 0.04;
+      camera.position.y += (-targetY + scrollT * 1.2 - camera.position.y) * 0.04;
+      camera.lookAt(torus.position.x * 0.3, torus.position.y * 0.2, 0);
+
+      // Dim scene as user scrolls deeper (content first)
+      host.style.opacity = String(Math.max(0.25, 1 - scrollT * 0.75));
+
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(tick);
+  }).catch(function () {
+    // CDN failed — CSS stage remains as fallback
+  });
+})();
+</script>
+<!-- /LANDIX-THREE -->
 </body>
 </html>
